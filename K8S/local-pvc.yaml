@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: plf-mssql-pvc
+spec:
+  resources:
+    requests:
+      storage: 200Mi # 200 mega bytes
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany

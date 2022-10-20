@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-srv
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/use-regex: 'true'
+spec:
+  rules:
+  - host: zianzena.com
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/api/platforms"
+        backend:
+          service:
+            name: platforms-clip
+            port: 
+              number: 5000
+      - pathType: Prefix
+        path: "/api/commands/platforms"
+        backend:
+          service:
+            name: command-clip
+            port:
+              number: 6000

@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mssql-plf-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: plf-mssql
+  template:
+    metadata:
+      labels:
+        app: plf-mssql
+    spec:
+      containers:
+        - name: plf-mssql
+          image: mcr.microsoft.com/mssql/server:2017-latest
+          ports:
+            - containerPort: 1433
+          env:
+            - name: ACCEPT_EULA
+              value: 'Y'
+            - name: MSSQL_SA_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mssql-cred
+                  key: SA_PASSWORD
+            - name: MSSQL_PID
+              value: 'Express'
+          volumeMounts:
+            - mountPath: /var/opt/mssql/data
+              name: mssqldb # this is a constant name
+      volumes:
+        - name: mssqldb
+          persistentVolumeClaim:
+            claimName: plf-mssql-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: plf-mssql-clip
+spec:
+  type: ClusterIP
+  selector:
+    app: plf-mssql
+  ports:
+  - name: plf-mssql-001
+    protocol: TCP
+    port: 1433
+    targetPort: 1433
+---
+# optional loadbalancer - to access mssql externally
+apiVersion: v1
+kind: Service
+metadata:
+  name: plf-mssql-lb
+spec:
+  type: LoadBalancer
+  selector:
+    app: plf-mssql
+  ports:
+  - protocol: TCP
+    port: 1433
+    targetPort: 1433

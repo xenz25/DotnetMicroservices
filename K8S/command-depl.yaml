@@ -1,0 +1,40 @@
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: command-depl
+spec:
+  replicas: 1
+  selector: # selecting the pod
+    matchLabels:
+      app: commandservice
+  template: #defining and deploying pod we are going to use
+    metadata:
+      labels:
+        app: commandservice
+    spec:
+      containers:
+      - name: commandservice
+        image: zianzena/commandservice:latest
+        ports:
+          - containerPort: 6000
+            name: cmd-port-001
+        env:
+          - name: ASPNETCORE_URLS
+            value: http://+:6000
+      imagePullSecrets:
+      - name: regcred
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: command-clip
+spec:
+  type: ClusterIP
+  selector:
+    app: commandservice
+  ports:
+    - name: cmd-clip-001
+      protocol: TCP
+      port: 6000
+      targetPort: 6000
